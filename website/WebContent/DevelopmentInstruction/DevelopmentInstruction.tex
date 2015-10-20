@@ -1,0 +1,195 @@
+\documentclass[a4paper]{article}
+
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{fullpage}
+\usepackage{amsmath}
+\usepackage{latexsym}
+\usepackage[pdftex]{graphicx}
+\usepackage{listings}
+\usepackage{textcomp}
+\usepackage{color}
+\usepackage{subfig}
+\usepackage{listings}
+\usepackage[toc,page]{appendix}
+\usepackage{sidecap}
+\usepackage{float}
+\usepackage{enumerate}
+\usepackage{url}
+\usepackage{hyperref}
+
+\setcounter{secnumdepth}{-1} 
+
+%opening
+\title{Development Instructions V1.0}
+\author{Zhe Sun, ymwdalex@gmail.com}
+
+\definecolor{listinggray}{gray}{0.9}
+\definecolor{lbcolor}{rgb}{0.9,0.9,0.9}
+\definecolor{Blue}{rgb}{0,0,0.5}
+\definecolor{Green}{rgb}{0,0.75,0.0}
+\definecolor{LightGray}{rgb}{0.6,0.6,0.6}
+\definecolor{DarkGray}{rgb}{0.3,0.3,0.3}
+
+\lstset{language=Matlab,
+  keywords={function,uint8,uint16,uint32,double,break,case,catch,continue,else,elseif,end,for,global,if,otherwise,persistent,return,switch,try,while},
+  basicstyle=\ttfamily\small,
+  breaklines=true,
+  keywordstyle=\bfseries\color{Blue},
+  commentstyle=\itshape\color{LightGray},
+  stringstyle=\color{Green},
+  numbers=left,
+  numberstyle=\tiny\color{DarkGray},
+  stepnumber=1,
+  numbersep=10pt,
+  backgroundcolor=\color{lbcolor},
+  tabsize=2,
+  showspaces=false,
+%  title=\lstname, 
+  showstringspaces=false,
+  captionpos=b}
+
+\begin{document}
+
+\maketitle
+%\tableofcontents
+%\pagebreak
+
+\section{Description}
+This file provides the development instructions of the web application called "Detection of vascular bifurcations in retinal fundus images using trainable COSFIRE filters" which can be accessed from http://matlabserver.cs.rug.nl:8080/RetinalVascularBifurcations/index.html. Should you have any queries please do not hesitate to contact me by email: ymwdalex@gmail.com.
+
+\section{Development environment}
+\begin{itemize}
+\item Eclipse: any version which supports "dynamic web project" development.
+\item MATLAB: must contain MATLAB Builder JA toolbox
+\item SVN: any version
+\end{itemize}
+
+\section{File structure}
+\begin{itemize}
+\item All the source code is managed by SVN. The url of the svn repository is \url{https://subversion.assembla.com/svn/retina/}. All the files reside there. The permission to access the SVN repository is required. At present, Nicolai Petkov, George Azzopardi and myself are the owners of the repository. Please ask us to give you the permission to access the SVN repository.
+\item If you fetch the source code from SVN repository, you will see two folders:
+	\begin{itemize}
+	\item MATLAB: the scripts of the COSFIRE filters, entry function and some postprocessing functions.
+	\item COSFIRE: All the files in the web application project, which can be opened by Eclipse.
+	\end{itemize}
+\end{itemize}
+
+\section{Deployment}
+\begin{itemize}
+\item MATLAB library: if any MATLAB code is updated, the MATLAB library must be rebuilt as per below instructions:
+	\begin{enumerate}
+	\item There is a "retina.prj" file under "MATLAB" folder. Open it with MATLAB Builder JA toolbox.
+	\item Add or delete the MATLAB files to this project
+	\item Press "build" button
+	\item Copy the library "./retina/distrib/retina.jar" to the web application folder "/WebContent/WEB-INF/lib"
+	\end{enumerate}
+\item Web application: the web application is deployed on Apache Tomcat 7
+	\begin{enumerate}
+	\item Export the project as a "war" file, name it as "RetinalVascularBifurcations.war".
+	\item Run "cmd" and go to Apache Tomcat 7 directory
+	\item Shutdown the server by the command "./bin/shutdown"
+	\item Delete the old folder of web application "webapps/RetinalVascularBifurcations"
+	\item Copy "RetinalVascularBifurcations.war" under "webapps" directory
+	\item Startup the server by the command "./bin/startup"
+	\item The real url is \url{http://matlabserver.cs.rug.nl:8080/RetinalVascularBifurcations/index.html}. The other MATLAB server already occupied port 80 by Apache httpd, the access url of our project is \url{http://matlabserver.cs.rug.nl/RetinalVascularBifurcations}, then the page will is redirected to the real page.
+	\end{enumerate}
+\end{itemize}
+
+\section{High level design of the web application}
+\begin{itemize}
+\item The fore-end job:
+	\begin{itemize}
+	\item The foreground job is developed by Html + CSS + JavaScript + JQuery
+	\item Layout and CSS follow the design of other former MATLAB server application in "http://matlabserver.cs.rug.nl"
+	\item Html + Javascript communicate with the user; If any server side action is called by the user, a Ajax call is evoked, the Java Servlet in the back-end executes and respond to the Ajax call
+	\end{itemize}
+\item The back-end job (server):
+	\begin{itemize}
+	\item The background job is developed by Java Servlet
+	\item "InitParam" is a special Servlet and is called when the web application startup. It takes charge in the initialization of system configuration.
+	\item The MATLAB code is compiled as a "jar" library, and called as a Java class.
+	\end{itemize}
+\end{itemize}
+
+\section{Files list}
+\begin{itemize}
+\item MATLAB server
+	\begin{itemize}
+	\item retina.prj: MATLAB Builder JA project file
+	\item retina.m: Entry of the COSFIRE filter. Generate and save the COSFIRE response in the sever. 
+	\item SystemConfig.m:Configure the COSFIRE parameter. Pay attention to "params.dataset.groundtruth" until "params.dataset.trainingData". It tells the MATLAB code where the input/output/operator files are.
+	pickBestCircle.m: The responses of the COSFIRE filters may be very close to each other. This script implements a condition that if the distance between two strong responses is less than a given distance threshold then the weaker one is suppressed.
+	\item posterior.m: A post analysis method based on some mathemtical morphology used to enahnce the localization obtained by theCOSFIRE filters. However, this is not being used.
+	\end{itemize}
+\item Fore-end:
+\begin{itemize}
+\item ``./" folder
+	\begin{itemize}
+	\item index.html: The main page
+	\item explanation.html:		the page which explains the parameters
+	\item conf\_operators.json: 	Configure the file name and the default threshold of each COSFIRE operator
+	\item conf\_path.json: 		configure the path of the image files
+	\item conf\_period.json: 		configure the maximum survival time of the files that are uploaded by the user. Here, you configure the interval which checks and cleanup the user uploaded file
+	\end{itemize}
+\item DevelopmentInstructioin folder: This document
+\item ``./css'' folder: CSS files
+	\begin{itemize}
+	\item hpci.css:	The same style as the former MATLAB server in matlabserver.cs.rug.n
+	\item jquery-ui-1.8.16.custom.css:	JQuery UI CSS, for slider
+	\end{itemize}
+\item ``./Dataset" folder: Save the default input images and operator images
+	\begin{itemize}
+	\item groundtruth: 	The folder that contains the manually segmented retinal vessel images taken from DRIVE
+	\item operators:		The folder where puts the COSFIRE operators
+	\item originalImg:	The folder that contains the colored retinal vessel images taken from DRIVE
+	\item outputImg:		Empty folder, the generated images will be stored here when the server is running in Tomcat 7.
+	\end{itemize}	
+\item ``./img" folder: Some images sources used in the webpage
+\item ``./js" folder: JavaScript files
+	\begin{itemize}
+	\item ajaxupload.js:	The plugin used to upload image files
+	\end{itemize}
+\item``./WEB-INF/lib" folder: the folder that contains the 3rd party library 
+	\begin{itemize}
+	\item retina.jar: The library generated by MATLAB Builder JA
+	\end{itemize}		
+\end{itemize}
+
+\item Back-end:
+	\begin{itemize}
+	\item MainServlet: 		This servlet is executed when the user clicks "Detect the vascular bifurcations" button
+	\item DeleteUserImg: 		This Servlet deletes the temporary file after the user refreshes or closes the browser 
+	\item DetectFolderExisted: 	Detects if the image has already been processed by the system
+	\item FetchImage: 		On a change event in the website this servlet is called and generate the image in the server
+	\item GetLocalImgFileList:  	This servlet returns the file list of the images in the database	
+	\item InitParam:			Initializes the parameters that will be used in the web application. This Servlet is called only
+	\item UploadBinaryServlet: Receives the file uploaded by a user, checks the format and size and then saves into the server disk.
+	\end{itemize}
+
+\end{itemize}
+
+	
+\section{Hint for future development}
+Some matters need attention when adding "segment the retina vessel" and "Upload the color vessel image":
+\begin{itemize}
+\item UI part
+	\begin{itemize}
+	\item Ajax uploader plugin can be used to implement uploading function. The JavaScript code in Line 475 in index.html and UploadBinaryServlet.java are the examples.
+	\item Pay attention to the relationship with the two select box: if one changes, another one should be updated as well.
+	\item When uploading or do the segmentation, user input or other information text should be disabled. The JavaScript functions "disableAllInput" and "disableUserFilter" should be helpful.  
+	\end{itemize}
+\item Servlet
+	\begin{itemize}
+	\item If the segmentation function is written by MATLAB, use MATLAB builder JA to compile the library; 
+	\item Add a Servlet descriptor in "./WEB-INF/web.xml"
+	\item Take care of the saving folder of the segmented image
+	\item Don't forget add the uploading file to the "UploadFileList", in that way, the user uploading file can be deleted periodically
+	\item If more global configuration parameters are needed, they can be initialed in InitParam.java and write the value in json files.
+	\end{itemize}
+\end{itemize}
+
+\pagebreak
+
+\end{document}

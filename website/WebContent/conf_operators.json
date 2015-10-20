@@ -1,0 +1,26 @@
+[
+	{
+		"name": "[259,227].mat",
+		"threshold": "0.24"
+	},
+	{
+		"name": "[302,525].mat",
+		"threshold": "0.22"
+	},
+	{
+		"name": "[338,388].mat",
+		"threshold": "0.42"
+	},
+	{
+		"name": "[403,200].mat",
+		"threshold": "0.39"
+	},
+	{
+		"name": "[423,128].mat",
+		"threshold": "0.40"
+	},
+	{
+		"name": "[500,386].mat",
+		"threshold": "0.36"
+	}
+]

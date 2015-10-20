@@ -1,0 +1,687 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   
+   <meta name="Author" content="G. Azzopardi and N. Petkov">
+   <meta name="Description" content="COSFIRE filters for keypoint detection and pattern recognition">
+   <meta name="Keywords" content="COSFIRE, COSFIRE filter, gabor, Gabor, gabor filter, gabor function, Gabor filter, Gabor function, keypoint detection,
+                                  V4, visual cortex, demo, shape-selective, trainable, trainable filters, shape, shape analysis">
+   <title>COSFIRE filters for keypoint detection and pattern recognition</title>
+   <link rel="stylesheet" type="text/css" href="./css/smoothness/jquery-ui-1.8.16.custom.css"> 
+   <link rel="stylesheet" href="./css/validationEngine.jquery.css" type="text/css"/>
+   <link rel="stylesheet" href="./css/template.css" type="text/css"/>
+   <link rel="stylesheet" type="text/css" href="./css/hpci.css">   
+</head>
+<body>
+
+<!--
+CREATED BY: Zhe Sun, ymwdalex@gmail.com, Groningen University,
+            Department of Computer Science, Intelligent Systems
+-->
+
+<script type="text/javascript" src="./js/jquery-1.7.1.js"></script>
+<!-- <script type="text/javascript" src="./js/jquery-1.7.2.min.js"></script> -->
+<script type="text/javascript" src="./js/jquery-ui-1.8.16.custom.min.js"></script>
+<script type="text/javascript" src="./js/ajaxupload.js"></script>
+<!-- <script src="./js/jquery.validationEngine-en.js" type="text/javascript" charset="utf-8"></script> -->
+<!-- <script src="./js/jquery.validationEngine.js" type="text/javascript" charset="utf-8"></script> -->
+
+
+<script type="text/javascript">
+	// -------------------------------------------
+	// some global variable to store the status of some hint text/gif  
+	var uploaderHandle;
+
+	var existFolder = false;
+	var timeStamp;
+
+	var selectMethodDisable;
+	var sliderDisable;
+	var invertDisable;
+	// -------------------------------------------
+	
+	// Disable/enable everything when the system is busy
+	function disableAllInput(flag, isSave){
+		if (flag){
+			if (isSave){
+				selectMethodDisable = $('#selFilter').attr('disabled');
+				sliderDisable = $('#slider').attr('disabled');
+				invertDisable = $('#invertOutput').attr('disabled');
+			}
+			$('#localImageList').attr('disabled', true);
+			$('#localImageListColor').attr('disabled', true);
+			
+			uploaderHandle.disable();
+						
+			$('#selFilter').attr('disabled', true);
+			$('#slider').slider("disable");
+			
+			$('#invertOutput').attr('disabled', true);
+			$('#ajaxBusy').show(); 
+			$('#updateButton').hide();	
+		}else{
+			$('#localImageList').attr('disabled', false);
+			$('#localImageListColor').attr('disabled', false);
+			
+			uploaderHandle.enable();
+			
+			$('#selFilter').attr('disabled', false);
+			$('#slider').slider("enable");
+			$('#invertOutput').attr('disabled', false);	
+		  $('#ajaxBusy').hide(); 
+		  $('#updateButton').show();	
+		  if (isSave){
+				$('#selFilter').attr('disabled', selectMethodDisable);
+				$('#slider').attr('disabled', sliderDisable);
+				$('#invertOutput').attr('disabled', invertDisable);	
+		  }
+		}
+	}
+	
+	// Disable/enable user input
+	function disableUserFilter(flag){
+		if (flag){
+			$('#selFilter').attr('disabled', true);
+			  $('#slider').slider("disable");
+			  $('#invertOutput').attr('disabled', true);
+		}else{
+			$('#selFilter').attr('disabled', false);
+			$('#slider').slider("enable");
+			$('#invertOutput').attr('disabled', false);	
+		}
+	}
+	
+	function threshOrMethodChange(){
+		var method = $('#selFilter').val();
+		var threshold = $( "#slider" ).slider( "value" );
+		var baseName = $('#localImageList').val();
+		//Zhe Sun, change png to gif
+		baseName = baseName.substring(0, baseName.lastIndexOf(".gif"));
+		var invertImg;
+		if ($('#invertOutput').attr('checked')) {
+			invertImg = false;
+		} else {
+			invertImg = true;
+		}
+
+		disableAllInput(true, false);
+		var methodTxt = $("#selFilter option[value='" + method + "']").text();
+		$('#showUserInfo').html("<b>Loading " + methodTxt + " image ...</b>");
+		$('#showUserInfo').show();
+		
+		var d = new Date();
+		var randTag = d.getTime();
+		
+		$.post("FetchImage", {
+			baseName : baseName,
+			method : method,
+			threshold : threshold,
+			invertImg : invertImg,
+			timeStamp : timeStamp,
+			randTag : randTag
+		}, function(rtv) {
+			  var outputPNGFile = "Dataset/outputImg/" + timeStamp + "/" + baseName + "_" + randTag + ".gif";
+			  var outputTxtFile = "Dataset/outputImg/" + timeStamp + "/" + baseName + "_coordinate.txt";
+			  var groundtruthFile = "Dataset/groundtruth/" + baseName + ".gif";
+			  
+			  var txtCoordinates = "";
+			  if ($('#selFilter').val() == "2"){
+				  txtCoordinates = '<tr><td colspan="5" align="center"></td>'
+					+ '<td colspan="5" align="center"></td>'
+					+ '<td colspan="5" align="center"><font size="-1">Download the <a href="' + outputTxtFile + '" target="_blank">coordinates of the detected points</a>.</font></td>'
+					+ '</tr><tr><td colspan="5" align="center"></td>'
+					+ '<td colspan="5" align="center"></td>'
+					+ '<td colspan="5" align="center"><font size="1">The coordinates of the detected points are given in <b>(row, col)</b> format.</font></td>'
+					+ '</tr>'
+			  }
+			  
+			  var inputPNGFile = "Dataset/groundtruth/" + baseName + ".gif";
+			  $('#downloadLinktable').empty();
+			  $('#downloadLinktable').append(
+				'<tr><td colspan="5" align="center"><font size="-1">Download the <a href="' + inputPNGFile + '" target="_blank">input image</a>.</font></td>'
+				+ '<td colspan="5" align="center"><font size="-1">Download the <a href="' + groundtruthFile + '" target="_blank">binary retinal image</a>.</font></td>'
+				+ '<td colspan="5" align="center"><font size="-1">Download the <a href="' + outputPNGFile + '" target="_blank">output image</a>.</font></td>'
+				+ '</tr>'
+				+ txtCoordinates
+			    );
+			  
+			  // todo: add rtv error
+				  
+// 				  $('#outputImage').attr("src", outputPNGFile + "?" + d.getTime());
+			      $('#outputImageLink').attr("href", outputPNGFile);			  
+				  $('#outputImage').attr("src", outputPNGFile);
+				  $('#outputImage').show();
+				  disableAllInput(false, false);
+				  $('#showUserInfo').hide();
+		});
+	}
+	
+	// Detect if COSFIRE filter has already been executed
+	function detectFolderExist(){
+		var fileName = $('#localImageList').val();
+		//var baseName = fileName.substring(0, fileName.lastIndexOf(".png"));
+		var baseName = fileName.substring(0, fileName.lastIndexOf(".gif"));
+		
+		// must use synchronized ajax call here
+		// first get the response of the server if the file is existed, then do the rest stuff
+		$.ajaxSetup({async:false});
+		$.post("DetectFolderExisted", {
+			baseName : baseName
+		}, function(rtv) {
+			if (rtv == 0){
+				 disableUserFilter(false);
+				existFolder = true;
+			} else {
+				 disableUserFilter(true);
+				existFolder = false;
+			}
+		});
+		$.ajaxSetup({async:true});
+	}
+	
+	// Call the servlet to calculate the COSFIRE filter response
+	function bifurcationsDetect(){
+		disableAllInput(true, false);		
+		$('#showUserInfo').html("<b>It takes you about 3min, please wait ...</b>");
+		$('#showUserInfo').show();
+		$('#outputImage').hide();
+		
+		/* get some values from elements on the page: */
+		var term1 = $('#localImageList').val();
+
+		/* Send the data using post and put the results in a div */
+		$.post("MainServlet", {
+			fileName : term1
+		}, function(rtv) {
+			disableAllInput(false, false);
+			if (rtv == 0){
+				  // Server return success 
+				  threshOrMethodChange();
+			} else {
+				// Server return failed 
+				alert("Server failed! Please make sure the image you are processing is binary image");
+			}
+			$('#showUserInfo').hide();
+		});		
+	}
+	
+	// remove the surfix name
+	function getBaseName(fileName){
+		return fileName.substring(0, fileName.lastIndexOf("."))
+	}
+	
+	// Some default action after the web page is loaded...
+	function defaultExecute(){
+		// Get the image list, select the first one and show the result
+		$.getJSON('GetLocalImgFileList', function(data) {
+			$("#localImageList option").remove();
+			$('#localImageListColor option').remove();
+			$.each(data, function(idx, val) {
+				if (val.type == 1){
+			     $('#localImageList')
+		         .append($("<option></option>")
+		         .attr("value",val.name)
+		         .text(val.name));
+				} else {
+					$('#localImageListColor')
+			         .append($("<option></option>")
+			         .attr("value",val.name)
+			         .text(val.name));	
+				}
+			});
+			$('#localImageList option[value="' + data[0] + '"]').attr('selected', 'selected');
+			var baseName = getBaseName(data[0].name);
+			$.each(data, function(idx, val) {
+				if (val.type == 0){
+					if (getBaseName(val.name) == baseName){
+						$('#localImageList option[value="' + val.name + '"]').attr('selected', 'selected');						
+					}
+				}
+			});
+			
+			// If detected folder is exist
+			detectFolderExist();
+			if (existFolder){
+				threshOrMethodChange();
+			}
+		});		
+	}
+	
+	// check if image is exist in the server
+	// This function is used when a binary image is uploaded, check if there is color image matched. 
+	function imgeExistChekcer(url)
+	{
+	    var http = new XMLHttpRequest();
+	    http.open('HEAD', url, false);
+	    http.send();
+	    return http.status!=404;
+	}
+
+	
+	// This global value is for recording current status
+	$(document).ready(function() {
+		
+		// assign the timestamp, it is used for create the temp folder
+		var d = new Date();
+		timeStamp = d.getTime();
+		timeStamp = timeStamp + "_" + Math.floor(Math.random() * 10000);
+
+		// when the browser refresh or leave the web page, delete the files generated by the web app 
+		$(window).bind("beforeunload", function () {
+			$.ajaxSetup({async:false});
+			$.post("DeleteUserImg", {
+				timeStamp : timeStamp
+			}, function(rtv) {
+				// nothing to do here
+			});
+		});
+		
+		// Below is for form validator, since we only have a slider to control the threshold,
+		// I just comment it
+		// binds form submission and fields to the validation engine
+		// $("#submition_form").validationEngine('attach', {promptPosition : "bottomLeft", scroll: false});
+	
+		// Some default execution after the web page is loaded
+		defaultExecute();
+		
+		// invisible some image/text
+		$("#outputImage").hide();
+		$('#ajaxBusy').hide(); 
+		$('#showUserInfo').hide();
+
+		// bind the action when the color image select box changes
+		$('#localImageListColor').change(function() {
+			  var fileName = $(this).val();
+			  $('#showUserInfo').html("<b>Loading image list...</b>");
+			  $('#showUserInfo').show();
+
+			  // get the basename
+			  var baseName = fileName.substring(0, fileName.lastIndexOf(".png"));
+			  
+			  // get the color image file name
+			  var originalFileName = baseName + ".png";
+			  var path = "Dataset/originalImg/" + originalFileName;
+			  $('#inputImageLink').attr("href", path);
+			  $('#inputImage').attr("src", path);
+			  $('#inputImage').load();
+			  
+			  // renew the image in the web page
+			  var binaryFileName = baseName + ".gif";
+			  pathBW = "Dataset/groundtruth/" + binaryFileName;
+			  $('#bwImageLink').attr("href", pathBW);
+			  $('#bwImage').attr("src", pathBW);
+			  $('#bwImage').load();
+			  
+			  // focus on the selected image
+			  $('#localImageList').val(binaryFileName);
+
+			  // WTF: why I use ajax sync here? Anyway, it is commented.
+				//$.ajaxSetup({async:false});
+			  
+			  	// check if COSFIRE operation has been done before...
+				$.post("DetectFolderExisted", {
+					baseName : baseName
+				}, function(rtv) {
+					if (rtv == 0){
+						// If COSFIRE operation has been done before, show the encircle/system output
+						// according to the thresholding and the method the user choose
+						$('#outputImage').show();
+						  threshOrMethodChange();
+						  disableUserFilter(false);
+						  existFolder = true;
+					} else {
+						// otherwise, don't show any output result
+						$('#outputImage').hide();
+						disableUserFilter(true);
+						  existFolder = false;
+					}
+					  // show "download original/binary image ..."
+					  var inputPNGFile = "Dataset/groundtruth/" + baseName + ".gif";
+					  $('#downloadLinktable').empty();
+					  $('#downloadLinktable').append(
+						'<tr><td colspan="5" align="center"><font size="-1">Download the <a href="' + path + '" target="_blank">input image</a>.</font></td>'
+						+ '<td colspan="5" align="center"><font size="-1">Download the <a href="' + pathBW + '" target="_blank">segmentation file of the vessel tree</a>.</font></td>'
+						+ '<td colspan="5" align="center"></td>'
+						+ '</tr>'
+					    );						
+				});
+				// WTF: why I use ajax sync here?
+//				$.ajaxSetup({async:true});
+				$('#showUserInfo').hide();
+		});
+		
+		
+		// binding the action when changing the select box of the binary image select box 
+		$('#localImageList').change(function() {
+			  var fileName = $(this).val();
+			  $('#showUserInfo').html("<b>Loading image list...</b>");
+			  $('#showUserInfo').show();
+			  
+			  // Capital/lowcase letter ???
+			  var baseName = fileName.substring(0, fileName.lastIndexOf(".gif"));
+			  var binaryFileName = baseName + ".gif";
+			  pathBW = "Dataset/groundtruth/" + binaryFileName;
+			  $('#bwImageLink').attr("href", pathBW);
+			  $('#bwImage').attr("src", pathBW);
+			  $('#bwImage').load();
+			  
+			  var originalFileName = baseName + ".png";
+			  var path = "Dataset/originalImg/" + originalFileName;
+			  
+			  var downloadStr;
+			  if (imgeExistChekcer(path)){
+				  $('#inputImage').attr("src", path);
+				  $('#inputImage').load();
+				  $('#localImageListColor').val(originalFileName);	
+				  $('#inputImageLink').attr("href", path);
+				  downloadStr = 'Download the <a href="' + path + '" target="_blank">input image</a>.';
+			  } else {
+				  $('#inputImage').attr("src", "img/NA.png");
+				  $('#inputImage').load();
+				  $('#localImageListColor').val("");	
+				  $('#inputImageLink').attr("href", "img/NA.png");
+				  downloadStr = "";
+			  }
+			  			  
+			  	// WTF: why I use ajax sync here?
+				// $.ajaxSetup({async:false});
+				$.post("DetectFolderExisted", {
+					baseName : baseName
+				}, function(rtv) {
+					if (rtv == 0){
+						$('#outputImage').show();
+						  threshOrMethodChange();
+						  disableUserFilter(false);
+						  existFolder = true;
+					} else {
+						$('#outputImage').hide();
+						disableUserFilter(true);
+						  existFolder = false;
+						
+					}
+					
+					  // show "download original/binary image ..."
+					  var inputPNGFile = "Dataset/groundtruth/" + baseName + ".gif";
+					  $('#downloadLinktable').empty();
+					  $('#downloadLinktable').append(
+						'<tr><td colspan="5" align="center"><font size="-1">' + downloadStr + '</font></td>'
+						+ '<td colspan="5" align="center"><font size="-1">Download the <a href="' + pathBW + '" target="_blank">segmentation file of the vessel tree</a>.</font></td>'
+						+ '<td colspan="5" align="center"></td>'
+						+ '</tr>'
+					    );						
+				});
+
+				// WTF: why I use ajax sync here?
+				// $.ajaxSetup({async:true});
+				$('#showUserInfo').hide();
+		});
+		
+		// binding the action when change the "thresholding" slider
+		$( "#slider" ).slider({
+			value:0.50,
+			min: 0,
+			max: 1,
+			step: 0.01,
+			slide: function( event, ui ) {
+				$( "#sliderBarHighVal" ).val(ui.value );
+			},
+			change: function(event, ui) {
+				threshOrMethodChange();
+			}		
+		});
+		// set the default value of the text box attached to the slider 
+		$( "#sliderBarHighVal" ).val($( "#slider" ).slider( "value" ) );
+		
+		// bind the action of method select box, show encircle image or system response 
+		$('#selFilter').change(function() {
+			if ($(this).val() == 2){
+				$('#invertOutputTbl').hide();
+			} else {
+				$('#invertOutputTbl').show();
+			}
+			threshOrMethodChange();
+		});
+
+		// hide the "invert" checkbox
+		$('#invertOutputTbl').hide();
+		
+		// bind the action when the "invert" checkbox change 
+		$('#invertOutput').change(function() {
+			if ($('#selFilter').val() != "2"){
+				threshOrMethodChange();				
+			}
+		});
+		
+	
+		// when "Detect the vascular bifrucation" button is clicked
+		$('#updateButton').click(
+			function(event) {
+  				/* stop form from submitting normally */
+				event.preventDefault();
+
+  				// contain error
+				// if (!$("#submition_form").validationEngine('validate')){return;}
+				
+				if (existFolder) {
+					if (confirm('The analysis result has been here. Are you sure starting a new bifurcation detectioin? It will take about 1 min.')){
+						bifurcationsDetect();
+					}
+				} else {
+					bifurcationsDetect();
+				}
+			}			
+		);
+		
+		// file uploader
+		uploaderHandle = new AjaxUpload('upload_button', {
+			action: 'UploadBinaryServlet',
+			name: 'myfile',
+			responseType: "json",
+			onSubmit: function(file, ext) {
+				//if (ext && /^(jpg|png|jpeg|gif|JPG|GIF)$/.test(ext)){
+				if (ext && /^(gif)$/.test(ext)){
+					/* Setting data */
+					// only support gif file at present
+				} else {					
+					// extension is not allowed
+					alert('Error: only images are allowed');
+					// cancel upload
+					return false;				
+				}
+				
+				$('#uploadingImg').show();
+				this.disable();
+			},
+			onComplete : function(file, response){
+				$('#uploadingImg').hide();
+				this.enable();
+				
+				if (response.error == 1){
+					alert(response.msg);
+				} else {
+					// If upload file complete and success, update the image list and select the new uploaded image
+					$.getJSON('GetLocalImgFileList', function(data) {
+		    			$("#localImageList option").remove();
+		    			$('#localImageListColor option').remove();
+		    			$.each(data, function(idx, val) {
+		    				if (val.type == 1){
+		    			     $('#localImageList')
+		    		         .append($("<option></option>")
+		    		         .attr("value",val.name)
+		    		         .text(val.name));
+		    				} else {
+		    					$('#localImageListColor')
+		    			         .append($("<option></option>")
+		    			         .attr("value",val.name)
+		    			         .text(val.name));	
+		    				}
+		    			});
+		    			$('#localImageList option[value="' + file + '"]').attr('selected', 'selected').trigger('change');
+		        	});		
+					
+				}
+			}	
+		});		
+
+	});
+</script>
+
+
+<!-- Below is html code -->
+
+<!-- heading -->
+<h1 class="pageheading">Detection of vascular bifurcations in retinal fundus images using trainable COSFIRE filters</h1>
+<a href="http://www.cs.rug.nl/~petkov" target="_blank">N. Petkov</a>, 
+<a href="http://www.cs.rug.nl/~azzopardi/" target="_blank">G. Azzopardi</a> and
+<a href="mailto:ymwdalex@gmail.com">Zhe Sun</a>, 
+<a href="http://www.rug.nl/corporate/?lang=en" target="_blank">University of Groningen</a>,<br>
+<a href="http://www.rug.nl/informatica/index" target="_blank">Department of Computing Science</a>, 
+<a href="http://www.cs.rug.nl/is/" target="_blank">Intelligent Systems</a>
+
+<p>
+Other on-line image processing and computer vision applications are available at <a href="http://matlabserver.cs.rug.nl/">http://matlabserver.cs.rug.nl</a>.
+
+<!-- introduction -->
+</p>
+On this site you can: automatically detect vascular bifurcations in segmented retinal images
+with some predefined COSFIRE filters, visualize the output of 
+the filters rendered as a gray-level image, visualize the detected vascular bifurcations as encircled features 
+in the input image, use the slider below the images to control the output of the COSFIRE 
+filters: the number of detected features decreases with an increasing threshold value 
+(i.e. moving the slider to the right), and download the output image with the detected 
+features encircled as well as the coordinates of these detected features.
+You can select a retinal image taken from the <a href="http://www.isi.uu.nl/Research/Databases/DRIVE/" target="_blank">DRIVE</a> data set 
+or upload your own binarized retinal image (in gif format).
+<br>
+
+<!-- future plan -->
+<br>
+We are currently extending this application by including a facility to upload colour retinal images, 
+and an algorithm to automatically segment the uploaded colour images. 
+
+<input type="hidden" name="mlmfile" value="edgedetection">
+
+<table width="100%" style="table-layout: fixed;">
+  <tbody><tr>
+    <td colspan="15"> <hr> </td> 
+  </tr>
+	<tr>
+		<td colspan="15" align="center" id="showUserInfo">
+			<b>It takes you about 3min, please wait ...</b>
+		</td>	
+	</tr>
+	
+	<tr>
+		<td colspan="15" align="center" id="updateButton"><input type="submit" value="Detect the vascular bifurcations" name="Submit"></td>
+	</tr>
+	
+	<tr>
+		<td colspan="15" align="center" id="ajaxBusy">
+			<img src="img/ajax-loader.gif">
+		</td>	
+	</tr>
+  <tr>
+    <td colspan="5" align="center" ><b><u>Input original image</u>:</b></td>
+<!-- 	<td colspan="5" align="center" ><b><u>Segmentation of the vessel tree</u>:</b></td> -->
+	<td colspan="5" align="center" ><b><u>Input segmented image</u>:</b></td>
+    <td colspan="5" align="center" >
+    	<b><u>Output image</u>:</b>
+	   <select name="selRight" size="1" id="selFilter">
+<!-- 	      remove COSFIRE option -->
+<!-- 	   	  <option value="1">COSFIRE</option> -->
+	   	  <option value="2" selected="selected">Encircled points</option>
+	   	  <option value="3">System output</option>
+        </select>
+     </td>
+   </tr>
+   <tr>
+
+	<td colspan="5" align="center" > 
+       <select id="localImageListColor" name="selImage" size="1" width="150" style="width: 150px">
+       </select>
+    </td>
+
+	 <td colspan="5" align="center">
+		<button id="upload_button">Choose File</button>
+<!-- 		<label id="uploadedFile"><font size="-1">No file chosen</font></label> -->
+<!-- 		<input id="upload_button" type="file" /> -->
+		<img id="uploadingImg" src="img/ajax-loader2.gif" style="display:none;">
+       <select id="localImageList" name="selImage" size="1" width="150" style="width: 150px">
+       </select>
+    </td>
+	 	 
+	 <td colspan="5" align="center" id="invertOutputTbl"><input type="checkbox" value="1" name="invertOutput" id="invertOutput">Invert output</td>
+   </tr>
+   <tr>
+   	 <td colspan="5" align="center"> 
+   	 	<div>
+   	 	<a id="inputImageLink" href="./Dataset/originalImg/21_training.png" target="_blank">
+   	 		<img src="./Dataset/originalImg/21_training.png" id="inputImage" alt="The original image is not available!" 
+   	 	style="max-width: 100%"/>
+   	 	</a>
+   	 	</div>
+   	 </td>
+	 <td colspan="5" align="center" > 
+	 	<a id="bwImageLink" href="./Dataset/groundtruth/21_training.gif" target="_blank">
+   	 	<img src="./Dataset/groundtruth/21_training.gif" id="bwImage" alt="the binary image should appear here"
+   	 	style="max-width: 100%"/> 
+<!--    	 	style="max-width: 320px"/>  -->
+   	 	</a>
+   	 </td>
+   	 <td colspan="5" align="center" >
+   	 	<a id="outputImageLink" href="" target="_blank">
+   	 	<img src="" id="outputImage" alt="the output image should appear here" 
+   	 	style="max-width: 100%"/>
+   	 	</a>
+   	 </td>
+   </tr>
+</tbody></table>
+
+<table width="100%" style="table-layout: fixed;">
+	<tbody id ="downloadLinktable">
+	</tbody>
+</table>
+
+
+  <br>
+
+  <table width="100%" style="table-layout: fixed;">
+  </tbody>
+  <tr>
+    <td colspan="1" align="left"><b><u><a href="explanation.html#thresholding" target="_blank">Threshold</a></u></b></td>
+  	<td colspan="4"><div id="slider"></div></td>
+  	<td colspan="1"><input type="text" id="sliderBarHighVal" style="text-align: right" name="sliderBarHighVal" value="0.2" disabled></td>
+  </tr>
+  </tbody></table>  
+
+  <table width="100%" style="table-layout: fixed;">
+  </tbody>
+  <tr>
+    <td colspan="14"> <hr> </td>
+  </tr>  
+  </tbody></table>
+<!-- </form> -->
+
+<br>
+<b>Ground truth data of vascular bifurcations in retinal images of the DRIVE database</b>
+<br>
+In <a href="http://www.cs.rug.nl/~imaging/databases/retina_database/" target="_blank">http://www.cs.rug.nl/~imaging/databases/retina_database/</a>, we provide the (row,col) coordinates of the vascular bifurcations that were manually selected as ground truth data in 40 binary images of the DRIVE data set.  
+<br>
+<br>
+
+<p id="footnote-1"><b>Reference</b> <br >[1] J.J. Staal, M.D. Abramoff, M. Niemeijer, M.A. Viergever, B. van Ginneken, "Ridge based vessel segmentation in color images of the retina", <i>IEEE Transactions on Medical Imaging</i>, 2004, vol. 23, pp. 501-509.</p>
+
+<!-- Start of StatCounter Code for Default Guide -->
+<script type="text/javascript">
+var sc_project=7818928; 
+var sc_invisible=1; 
+var sc_security="26431564"; 
+</script>
+<script type="text/javascript"
+src="http://www.statcounter.com/counter/counter.js"></script>
+<noscript><div class="statcounter"><a title="tumblr visit
+counter" href="http://statcounter.com/tumblr/"
+target="_blank"><img class="statcounter"
+src="http://c.statcounter.com/7818928/0/26431564/1/"
+alt="tumblr visit counter"></a></div></noscript>
+<!-- End of StatCounter Code for Default Guide -->
+</body></html>

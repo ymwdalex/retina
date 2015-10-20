@@ -1,0 +1,7 @@
+If user is loading image/using COSFIRE, use reload or leave the page, make the directory can not be deleted
+
+Record uploaded file as file? Delete output file of uploaded file??
+
+httpd??
+
+Comments

@@ -1,0 +1,125 @@
+BODY {
+	FONT-SIZE: 12pt;
+	BACKGROUND: #ffffdd;
+	MARGIN-BOTTOM: 5%;
+	MARGIN-LEFT: 10%;
+	COLOR: #000000;
+	MARGIN-RIGHT: 10%;
+	FONT-FAMILY: sans-serif
+}
+
+H1.pageheading {
+	BORDER-RIGHT: medium none;
+	PADDING-RIGHT: 12pt;
+	BORDER-TOP: medium none;
+	PADDING-LEFT: 12pt;
+	FONT-WEIGHT: bold;
+	FONT-SIZE: large;
+	BACKGROUND: #003366;
+	PADDING-BOTTOM: 12pt;
+	BORDER-LEFT: medium none;
+	WIDTH: 100%;
+	COLOR: #ffffff;
+	PADDING-TOP: 12pt;
+	BORDER-BOTTOM: medium none;
+	FONT-FAMILY: sans-serif;
+	TEXT-ALIGN: center
+}
+
+H1 {
+	BORDER-RIGHT: medium none;
+	BORDER-TOP: medium none;
+	FONT-WEIGHT: bold;
+	FONT-SIZE: large;
+	BORDER-LEFT: medium none;
+	COLOR: #000000;
+	BORDER-BOTTOM: medium none;
+	FONT-FAMILY: sans-serif
+}
+
+H2.pagecontent {
+	BORDER-RIGHT: medium none;
+	BORDER-TOP: medium none;
+	BORDER-LEFT: medium none;
+	COLOR: #003366;
+	BORDER-BOTTOM: medium none;
+	FONT-FAMILY: sans-serif;
+	TEXT-ALIGN: center
+}
+
+H2 {
+	BORDER-RIGHT: medium none;
+	BORDER-TOP: medium none;
+	BORDER-LEFT: medium none;
+	COLOR: #000000;
+	BORDER-BOTTOM: medium none;
+	FONT-FAMILY: sans-serif
+}
+
+H2.red {
+	BORDER-RIGHT: medium none;
+	BORDER-TOP: medium none;
+	BORDER-LEFT: medium none;
+	COLOR: #ff0000;
+	TEXT-INDENT: 0pt;
+	BORDER-BOTTOM: medium none;
+	FONT-FAMILY: sans-serif;
+	TEXT-ALIGN: left
+}
+
+H3 {
+	BORDER-RIGHT: medium none;
+	BORDER-TOP: medium none;
+	FONT-SIZE: medium;
+	BORDER-LEFT: medium none;
+	COLOR: #000000;
+	BORDER-BOTTOM: medium none;
+	FONT-FAMILY: sans-serif
+}
+
+P.justified {
+	FONT-SIZE: 12pt;
+	FONT-FAMILY: sans-serif;
+	TEXT-ALIGN: justify
+}
+
+P.footnote {
+	FONT-SIZE: 10pt;
+	FONT-FAMILY: sans-serif;
+	FONT-STYLE: italic;
+	TEXT-ALIGN: justify
+}
+
+P {
+	FONT-SIZE: 12pt;
+	FONT-FAMILY: sans-serif;
+	TEXT-ALIGN: left
+}
+
+UL {
+	FONT-SIZE: 12pt;
+	FONT-FAMILY: sans-serif;
+	LIST-STYLE-TYPE: disc TEXT-ALIGN :    justify
+}
+
+OL {
+	FONT-SIZE: 12pt;
+	FONT-FAMILY: sans-serif
+}
+
+TD {
+	FONT-SIZE: 12pt;
+	FONT-FAMILY: sans-serif
+}
+
+A:link {
+	COLOR: #3860e6
+}
+
+A:active {
+	COLOR: #3860e6
+}
+
+A:visited {
+	COLOR: #551a8b
+}

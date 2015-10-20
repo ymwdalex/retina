@@ -1,0 +1,6 @@
+{
+	"originalInputFolder": "Dataset\\originalImg\\",
+	"binaryInputFolder": "Dataset\\groundtruth\\",
+	"operatorFolder": "Dataset\\operators\\",
+	"outputFolder": "Dataset\\outputImg\\"
+}

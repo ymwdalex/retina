@@ -1,0 +1,4 @@
+{
+	"cleanUpOldFilePeriod": 86400,
+	"maxLiveTime": 604800
+}

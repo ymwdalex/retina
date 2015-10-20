@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" id="WebApp_ID" version="2.5">
+  <display-name></display-name>
+  <welcome-file-list>
+    <welcome-file>index.html</welcome-file>
+  </welcome-file-list>
+  <servlet>
+    <description></description>
+    <display-name>GetLocalImgFileList</display-name>
+    <servlet-name>GetLocalImgFileList</servlet-name>
+    <servlet-class>GetLocalImgFileList</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>GetLocalImgFileList</servlet-name>
+    <url-pattern>/GetLocalImgFileList</url-pattern>
+  </servlet-mapping>
+  <servlet>
+    <description></description>
+    <display-name>MainServlet</display-name>
+    <servlet-name>MainServlet</servlet-name>
+    <servlet-class>MainServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>MainServlet</servlet-name>
+    <url-pattern>/MainServlet</url-pattern>
+  </servlet-mapping>
+  <servlet>
+    <description></description>
+    <display-name>FetchImage</display-name>
+    <servlet-name>FetchImage</servlet-name>
+    <servlet-class>FetchImage</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>FetchImage</servlet-name>
+    <url-pattern>/FetchImage</url-pattern>
+  </servlet-mapping>
+  <servlet>
+    <description></description>
+    <display-name>DetectFolderExisted</display-name>
+    <servlet-name>DetectFolderExisted</servlet-name>
+    <servlet-class>DetectFolderExisted</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>DetectFolderExisted</servlet-name>
+    <url-pattern>/DetectFolderExisted</url-pattern>
+  </servlet-mapping>
+  <servlet>
+    <description></description>
+    <display-name>DeleteUserImg</display-name>
+    <servlet-name>DeleteUserImg</servlet-name>
+    <servlet-class>DeleteUserImg</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>DeleteUserImg</servlet-name>
+    <url-pattern>/DeleteUserImg</url-pattern>
+  </servlet-mapping>
+
+  <servlet>
+    <description></description>
+    <display-name>UploadBinaryServlet</display-name>
+    <servlet-name>UploadBinaryServlet</servlet-name>
+    <servlet-class>UploadBinaryServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>UploadBinaryServlet</servlet-name>
+    <url-pattern>/UploadBinaryServlet</url-pattern>
+  </servlet-mapping>
+  
+  <servlet>
+    <description></description>
+    <display-name>UploadBinaryCheckServlet</display-name>
+    <servlet-name>UploadBinaryCheckServlet</servlet-name>
+    <servlet-class>UploadBinaryCheckServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>UploadBinaryCheckServlet</servlet-name>
+    <url-pattern>/UploadBinaryCheckServlet</url-pattern>
+  </servlet-mapping>
+  
+  <servlet>
+    <description></description>
+    <display-name>UploadColorServlet</display-name>
+    <servlet-name>UploadColorServlet</servlet-name>
+    <servlet-class>UploadColorServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>UploadColorServlet</servlet-name>
+    <url-pattern>/UploadColorServlet</url-pattern>
+  </servlet-mapping>
+  
+  
+  <servlet>
+    <description></description>
+    <display-name>UploadColorCheckServlet</display-name>
+    <servlet-name>UploadColorCheckServlet</servlet-name>
+    <servlet-class>UploadColorCheckServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>UploadColorCheckServlet</servlet-name>
+    <url-pattern>/UploadColorCheckServlet</url-pattern>
+  </servlet-mapping>
+  
+  
+  
+  <listener>
+    <listener-class>InitParam</listener-class>
+  </listener>
+</web-app>
